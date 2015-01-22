@@ -40,16 +40,6 @@ public class Main extends HttpServlet {
       message = "Event hook \"" + hook + "\" not implemented yet";
     }
 
-    // Envia mensagem apenas caso tenha algo para ser enviado
-    if (!message.equals("")) {
-      // Gera uma instância do bot
-      SlackBot bot = new SlackBot(System.getenv("SLACK_HOST"),
-              System.getenv("SLACK_TOKEN"));
-
-      // Manda a mensagem
-      bot.message("#tests", message);
-    }
-
     // Mostra um feedback na tela, só para debug caso necessário
     PrintWriter writer = resp.getWriter();
     writer.print(message);
@@ -113,6 +103,26 @@ public class Main extends HttpServlet {
     message = message + "`\n:octocat: *Pull description:* ";
     message = message + pullRequest.optString("title");
 
+    // Gera uma instância do bot
+    SlackBot bot = new SlackBot(System.getenv("SLACK_HOST"),
+            System.getenv("SLACK_TOKEN"));
+
+    // Descobre para que canal está associado este repositório
+    JSONObject channels;
+    try {
+      channels = new JSONObject(System.getenv("SLACK_REPO_CHANNEL"));
+    } catch (JSONException e) {
+      return "You need to specify a relation between repositories" +
+              "and the respective slack channel to send the message";
+    }
+
+    String channel = channels.optString(repo.optString("full_name"));
+    if (channel.equals("")) {
+      return "There is no channel configured to receive updates from " +
+              repo.optString("full_name");
+    }
+
+    bot.message(channel, message);
     return message;
 
   }
@@ -128,7 +138,7 @@ public class Main extends HttpServlet {
   private JSONObject getJSONPayload(HttpServletRequest req) {
 
     StringBuffer buffer = new StringBuffer();
-    String line = null;
+    String line;
 
     try {
       BufferedReader reader = req.getReader();
@@ -136,7 +146,7 @@ public class Main extends HttpServlet {
         buffer.append(line);
     } catch (Exception e) { /*report an error*/ }
 
-    JSONObject jsonPayload = null;
+    JSONObject jsonPayload;
     try {
       jsonPayload = new JSONObject(buffer.toString());
     } catch (JSONException e) {
@@ -155,6 +165,7 @@ public class Main extends HttpServlet {
 
     Map<String, String> map = new HashMap<String, String>();
     Enumeration headerNames = req.getHeaderNames();
+
     while (headerNames.hasMoreElements()) {
       String key = (String) headerNames.nextElement();
       String value = req.getHeader(key);
