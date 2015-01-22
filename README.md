@@ -1,33 +1,72 @@
-# java-getting-started
+# Integração entre Github e Slackbot
 
-A barebones Java app, which can easily be deployed to Heroku.  
+Service para ligar WebHooks do Github com o Slackbot do Slack.
 
-This application support the [Getting Started with Java on Heroku](https://devcenter.heroku.com/articles/getting-started-with-java) article - check it out.
+Até o momento, trata apenas o evento de *abertura de pull request*, onde o bot deverá enviar notificação para um canal predeterminado informando que um pull foi aberto.
 
-## Running Locally
+## Configuração
 
-Make sure you have Java and Maven installed.  Also, install the [Heroku Toolbelt](https://toolbelt.heroku.com/).
+### Heroku
 
-```sh
-$ git clone https://github.com/heroku/java-getting-started.git
-$ cd java-getting-started
-$ mvn install
-$ foreman start web
+Você pode fazer o deploy desta aplicação diretamente no Heroku. Para tal, siga o passo-a-passo abaixo:
+
+1. Crie uma conta no Heroku
+2. Instale o [toolbelt deles](https://toolbelt.heroku.com/)
+3. Siga os comandos abaixo para preparar
+   ```bash
+   git clone https://github.com/gustavosf/slackbot-for-pull-request.git
+   cd slackbot-for-pull-request
+   heroku create
+   git push heroku master
+   ```
+4. Ao usar `heroku create`, ele deverá ter retornado uma url. Salve ela para depois
+
+O serviço já está instalado no heroku, vamos configurar o resto
+
+### Slack
+
+Você primeiro deve incluir uma integração no Slack. Para isso, siga os passos abaixo:
+
+1. Acesse o slack
+2. Clique no nome da empresa no canto superior esquerdo
+3. Clique em `Configure Integrations`
+4. No final da página você encontrará `SlackBot`. Clique em `Add` para incluiur uma integração
+5. Clique em `Add Slackbot Integration`
+6. Sua integração está configurada. Da URL que ele retorna, extraia o host e o token
+
+Você deverá ter neste momento, dois parâmetros como estes:
+
+```
+host = objectedge.slack.com
+token = AlX2w0YcaBrzi2iy6gUZAV7Y
 ```
 
-Your app should now be running on [localhost:5000](http://localhost:5000/).
+Você precisa indicar estes parâmetros para a sua instância no Heroku, pois este app busca eles das variáveis de sistema. Para isso, digite no terminal, dentro da pasta do repo:
 
-## Deploying to Heroku
 
-```sh
-$ heroku create
-$ git push heroku master
-$ heroku open
+```bash
+heroku config:set SLACK_HOST=objectedge.slack.com
+heroku config:set SLACK_TOKEN=AlX2w0YcaBrzi2iy6gUZAV7Y
+heroku config:set SLACK_REPO_CHANNEL="{\"gustavosf/oebot\":\"#oebot-updates\"}"
 ```
+**Altere os valores acima para os que foram gerados por você**
 
-## Documentation
+Repare que o parâmetro `SLACK_REPO_CHANNEL` é um json com uma lista de <repo>:<channel>. Este é o mapeamento que este app fará para saber para qual canal deve mandar atualizações de um determinado repositório.
 
-For more information about using Java on Heroku, see these Dev Center articles:
+### GitHub
 
-- [Java on Heroku](https://devcenter.heroku.com/categories/java)
+1. Acesse o repositório que você deseja instalar esta integração
+2. Clique em `Settings`
+3. Clique em `Webhooks & Services`
+4. Clique em `Add webhook`
+5. Em *Payload URL*, coloque a url do heroku
+6. Deixe *Content Type* como `application/json`
+7. Coloque um secret qualquer (todo: aceitar reqs apenas com o secret correto)
+8. Selecione `Let me select individual events`
+9. Selecione apenas o evento `Pull Request`
+10. Marque como `Active`
+11. Clique em `Add webhook`
 
+O GitHub estará configurado também.
+
+Você já deve ter todo ambiente configurado, e o seu bot já deverá conseguir enviar atualizações de Pull Requests do Github para o Slack!
