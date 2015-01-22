@@ -40,22 +40,19 @@ public class Main extends HttpServlet {
       message = "Event hook \"" + hook + "\" not implemented yet";
     }
 
-    // Gera uma instância do bot
-    SlackBot bot = new SlackBot(System.getenv("SLACK_HOST"),
-            System.getenv("SLACK_TOKEN"));
+    // Envia mensagem apenas caso tenha algo para ser enviado
+    if (!message.equals("")) {
+      // Gera uma instância do bot
+      SlackBot bot = new SlackBot(System.getenv("SLACK_HOST"),
+              System.getenv("SLACK_TOKEN"));
 
-    // Manda a mensagem
-    bot.message("#tests", message);
+      // Manda a mensagem
+      bot.message("#tests", message);
+    }
 
     // Mostra um feedback na tela, só para debug caso necessário
     PrintWriter writer = resp.getWriter();
     writer.print(message);
-
-
-//    for (Map.Entry<String, String> entry : headers.entrySet())
-//    {
-//      writer.print(entry.getKey() + "/" + entry.getValue());
-//    }
 
   }
 
@@ -68,6 +65,7 @@ public class Main extends HttpServlet {
   }
 
   public static void main(String[] args) throws Exception {
+
     Server server = new Server(Integer.valueOf(System.getenv("PORT")));
     ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
     context.setContextPath("/");
@@ -75,6 +73,7 @@ public class Main extends HttpServlet {
     context.addServlet(new ServletHolder(new Main()),"/*");
     server.start();
     server.join();
+
   }
 
   //*************************************************************************//
@@ -88,6 +87,8 @@ public class Main extends HttpServlet {
    */
   protected String processPullRequest(JSONObject payload) {
 
+    if (payload.optString("action") != "opened") return "";
+
     JSONObject pullRequest = payload.optJSONObject("pull_request");
     JSONObject user = pullRequest.optJSONObject("user");
     JSONObject repo = payload.optJSONObject("repository");
@@ -98,18 +99,18 @@ public class Main extends HttpServlet {
     // Monta a mensagem a ser enviada para o slack
     message = ":octocat: New pull request for the repo *";
     message = message + repo.optString("name");
-    message = message + "*:\n*";
+    message = message + "*: ";
+    message = message + pullRequest.optString("html_url");
+    message = message + "\n:octocat: *";
     message = message + user.optString("login");
     message = message + "* wants to merge *";
     message = message + pullRequest.optString("number");
-    message = message + " commit(s)* into *";
+    message = message + " commit(s)* into `";
     message = message + base.optString("label");
-    message = message + "* from *";
+    message = message + "` from `";
     message = message + head.optString("label");
-    message = message + "\n";
+    message = message + "`\n:octocat: *Pull description:* ";
     message = message + pullRequest.optString("title");
-    message = message + "\n";
-    message = message + pullRequest.optString("html_url");
 
     return message;
 
@@ -124,6 +125,7 @@ public class Main extends HttpServlet {
    * @return Payload
    */
   private JSONObject getJSONPayload(HttpServletRequest req) {
+
     StringBuffer buffer = new StringBuffer();
     String line = null;
 
@@ -149,6 +151,7 @@ public class Main extends HttpServlet {
    * @return Headers
    */
   private Map<String, String> getHeadersInfo(HttpServletRequest req) {
+
     Map<String, String> map = new HashMap<String, String>();
     Enumeration headerNames = req.getHeaderNames();
     while (headerNames.hasMoreElements()) {
@@ -158,6 +161,7 @@ public class Main extends HttpServlet {
     }
 
     return map;
+
   }
 
 }
