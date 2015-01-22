@@ -9,55 +9,75 @@ import java.sql.*;
 
 public class Main extends HttpServlet {
   @Override
+  protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+      throws ServletException, IOException {
+
+    Map<String, String> headers = getHeadersInfo(req);
+
+    String hook = headers.get("X-GitHub-Event");
+
+    if (hook == "pull_request") processPullRequest(getJSONPayload(req));
+
+  }
+
+  protected void processPullRequest(JSONObject payload) {
+
+    // int someInt = payload.getInt("intParamName");
+    // String someString = payload.getString("stringParamName");
+    // JSONObject nestedObj = payload.getJSONObject("nestedObjName");
+    // JSONArray arr = payload.getJSONArray("arrayParamName");
+
+    // String responseMessage;
+    // responseMessage = ""
+
+  }
+
+  /**
+   * Retorna o paylaod enviado pelo webhook
+   * @return Payload
+   */
+  private JSONObject getJSONPayload(HttpServletRequest req) {
+    StringBuffer jb = new StringBuffer();
+    String line = null;
+
+    try {
+      BufferedReader reader = req.getReader();
+      while ((line = reader.readLine()) != null)
+        jb.append(line);
+    } catch (Exception e) { /*report an error*/ }
+
+    try {
+      JSONObject jsonPayload = JSONObject.fromObject(jb.toString());
+    } catch (ParseException e) {
+      // crash and burn
+      throw new IOException("Error parsing JSON request string");
+    }
+
+    return jsonPayload;
+  }
+
+  /**
+   * Retorna os headers da requisição
+   * @return Headers
+   */
+  private Map<String, String> getHeadersInfo(HttpServletRequest req) {
+    Map<String, String> map = new HashMap<String, String>();
+    Enumeration headerNames = request.getHeaderNames();
+    while (headerNames.hasMoreElements()) {
+      String key = (String) headerNames.nextElement();
+      String value = request.getHeader(key);
+      map.put(key, value);
+    }
+
+    return map;
+  }
+
+  @Override
   protected void doGet(HttpServletRequest req, HttpServletResponse resp)
       throws ServletException, IOException {
 
-    if (req.getRequestURI().endsWith("/db")) {
-      showDatabase(req,resp);
-    } else {
-      showHome(req,resp);
-    }
-  }
+    resp.getWriter().print("Hello fella!");
 
-  private void showHome(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException {
-    resp.getWriter().print("Hello from Java!");
-  }
-
-  private void showDatabase(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException {
-    Connection connection = null;
-    try {
-      connection = getConnection();
-
-      Statement stmt = connection.createStatement();
-      stmt.executeUpdate("CREATE TABLE IF NOT EXISTS ticks (tick timestamp)");
-      stmt.executeUpdate("INSERT INTO ticks VALUES (now())");
-      ResultSet rs = stmt.executeQuery("SELECT tick FROM ticks");
-
-      String out = "Hello!\n";
-      while (rs.next()) {
-          out += "Read from DB: " + rs.getTimestamp("tick") + "\n";
-      }
-
-      resp.getWriter().print(out);
-    } catch (Exception e) {
-      resp.getWriter().print("There was an error: " + e.getMessage());
-    } finally {
-      if (connection != null) try{connection.close();} catch(SQLException e){}
-    }
-  }
-
-  private Connection getConnection() throws URISyntaxException, SQLException {
-    URI dbUri = new URI(System.getenv("DATABASE_URL"));
-
-    String username = dbUri.getUserInfo().split(":")[0];
-    String password = dbUri.getUserInfo().split(":")[1];
-    int port = dbUri.getPort();
-
-    String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + port + dbUri.getPath();
-
-    return DriverManager.getConnection(dbUrl, username, password);
   }
 
   public static void main(String[] args) throws Exception {
