@@ -87,7 +87,8 @@ public class Main extends HttpServlet {
    */
   protected String processPullRequest(JSONObject payload) {
 
-    if (payload.optString("action") != "opened") return "";
+    // Só envia mensagem caso seja uma abertura de pull
+    if (!payload.optString("action").equals("opened")) return "";
 
     JSONObject pullRequest = payload.optJSONObject("pull_request");
     JSONObject user = pullRequest.optJSONObject("user");
