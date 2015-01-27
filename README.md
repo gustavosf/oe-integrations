@@ -30,7 +30,7 @@ Você primeiro deve incluir uma integração no Slack. Para isso, siga os passos
 1. Acesse o slack
 2. Clique no nome da empresa no canto superior esquerdo
 3. Clique em `Configure Integrations`
-4. No final da página você encontrará `SlackBot`. Clique em `Add` para incluiur uma integração
+4. No final da página você encontrará `intelimen.oebot.SlackBot`. Clique em `Add` para incluiur uma integração
 5. Clique em `Add Slackbot Integration`
 6. Sua integração está configurada. Da URL que ele retorna, extraia o host e o token
 

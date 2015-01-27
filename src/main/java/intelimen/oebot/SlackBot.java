@@ -1,8 +1,10 @@
+package intelimen.oebot;
+
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
 /**
- * Abstração para comandos do SlackBot
+ * Abstração para comandos do intelimen.oebot.SlackBot
  *
  * Created by gustavo on 22/01/15.
  */

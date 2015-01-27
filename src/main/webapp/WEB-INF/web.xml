@@ -1,0 +1,17 @@
+<!DOCTYPE web-app PUBLIC
+        "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+        "http://java.sun.com/dtd/web-app_2_3.dtd" >
+
+<web-app>
+    <display-name>Integrações Slack</display-name>
+
+    <!-- Integração com o Github -->
+    <servlet>
+        <servlet-name>GithubIntegration</servlet-name>
+        <servlet-class>intelimen.oebot.integration.Github</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GithubIntegration</servlet-name>
+        <url-pattern>/github</url-pattern>
+    </servlet-mapping>
+</web-app>
