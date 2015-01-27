@@ -14,4 +14,14 @@
         <servlet-name>GithubIntegration</servlet-name>
         <url-pattern>/github</url-pattern>
     </servlet-mapping>
+
+    <!-- Integração com o Gamification -->
+    <servlet>
+        <servlet-name>GamificationIntegration</servlet-name>
+        <servlet-class>intelimen.oebot.integration.Gamification</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GamificationIntegration</servlet-name>
+        <url-pattern>/gamification</url-pattern>
+    </servlet-mapping>
 </web-app>

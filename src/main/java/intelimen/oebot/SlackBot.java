@@ -25,6 +25,15 @@ public class SlackBot {
         this.token = token;
     }
 
+    /**
+     * Gerador estático
+     * @return SlackBot
+     */
+    public static SlackBot getInstance() {
+        return new SlackBot(System.getenv("SLACK_HOST"),
+                System.getenv("SLACK_TOKEN"));
+    }
+
     //*************************************************************************//
     //***  COMANDOS   *********************************************************//
     //*************************************************************************//
