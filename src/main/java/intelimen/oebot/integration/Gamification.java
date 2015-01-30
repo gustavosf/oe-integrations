@@ -2,9 +2,7 @@ package intelimen.oebot.integration;
 
 import intelimen.oebot.Main;
 import intelimen.oebot.SlackBot;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.json.JSONString;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -80,9 +78,9 @@ public class Gamification extends Main {
 
         if (message == null) {
             // Caso o usuário não passe uma mensagem, monta uma genérica
-            message = ":crown: Temos um novo Rei no dia de hoje!";
-            message += ":crown: Long live *" + name + "*!";
-            message += ":crown: :beer::metal::crab::beer::dancers::clap::beer::trollface::beers::dancers::trophy::beers:";
+            message = ":gamification: Temos um novo Rei no dia de hoje! :crown:\n";
+            message += ":gamification: Long live *" + name + "*!";
+            message += ":gamification: :beer::metal::crab::beer::dancers::crown::clap::beer::trollface::crown::beers::dancers::trophy::crown::beers:";
         }
 
         // Gera uma instância do bot e manda a mensagem
